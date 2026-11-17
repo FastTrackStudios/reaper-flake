@@ -28,13 +28,13 @@
 }:
 
 let
-  version = "7.75";
+  version = "7.86";
   versionNoDots = builtins.replaceStrings [ "." ] [ "" ] version;
   majorVersion = lib.versions.major version;
 
   darwinSrc = fetchurl {
     url = "https://www.reaper.fm/files/${majorVersion}.x/reaper${versionNoDots}_universal.dmg";
-    hash = "sha256-rUm/Nyq1QzkxwdEGqc6RGXtpXUcxy1Y4x9YmRL0KElU=";
+    hash = "sha256-JZ8UDszZGbV9H69bKFGjXKB33ZmTynzF6yjW1Xt3eGY=";
   };
 in
 stdenv.mkDerivation {
@@ -45,11 +45,11 @@ stdenv.mkDerivation {
     {
       x86_64-linux = fetchurl {
         url = "https://www.reaper.fm/files/${majorVersion}.x/reaper${versionNoDots}_linux_x86_64.tar.xz";
-        hash = "sha256-BC8W/e1thX1uEKLuPAZ4ALPaCuGfmRVhKmmDvrHEkl4=";
+        hash = "sha256-wvnYYWvR3GF1mTuCRR4cbjUsZ2Hnrm1yQAo/PfsDvts=";
       };
       aarch64-linux = fetchurl {
         url = "https://www.reaper.fm/files/${majorVersion}.x/reaper${versionNoDots}_linux_aarch64.tar.xz";
-        hash = "sha256-+93eBKvQYXyvdnWtbVx7eL6QtvuXKKpXtFPJxxdkVYk=";
+        hash = "sha256-WzO1HbXawfdBcrRJ63Zbl3jfTb3LFk2TCpR9jLNHZlY=";
       };
       x86_64-darwin = darwinSrc;
       aarch64-darwin = darwinSrc;
