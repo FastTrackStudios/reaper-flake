@@ -94,6 +94,22 @@ stdenv.mkDerivation (finalAttrs: {
     "libglib-2.0.so.0"
   ];
 
+  # glibc 2.44's ld.so segfaults in dl_main on the reaper executable once
+  # patchelf has rewritten it at the default 4 KiB page size (it adds a
+  # segment below the binary's 2 MiB-aligned layout), so REAPER dies
+  # before showing a window. The executable alone is re-patched from a
+  # pristine copy at its own 2 MiB alignment; that flag breaks the .so
+  # files, so autoPatchelf runs normally for everything else.
+  dontAutoPatchelf = true;
+  postFixup = ''
+    autoPatchelf -- "$out"
+    exe=$out/opt/REAPER/.reaper-wrapped
+    interp=$(patchelf --print-interpreter "$exe")
+    rpath=$(patchelf --print-rpath "$exe")
+    install -m755 "$NIX_BUILD_TOP/reaper-pristine" "$exe"
+    patchelf --page-size 2097152 --set-interpreter "$interp" --set-rpath "$rpath" "$exe"
+  '';
+
   dontBuild = true;
   dontStrip = true;
 
@@ -123,6 +139,7 @@ stdenv.mkDerivation (finalAttrs: {
       echo "Headless libSwell.so installed (NOGDK)"
     ''}
 
+    cp $out/opt/REAPER/reaper "$NIX_BUILD_TOP/reaper-pristine"
     wrapProgram $out/opt/REAPER/reaper \
       --prefix PATH : "${lib.makeBinPath [ xdg-utils ]}" \
       --prefix LD_LIBRARY_PATH : "${
