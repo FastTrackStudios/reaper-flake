@@ -140,7 +140,11 @@ stdenv.mkDerivation (finalAttrs: {
     ''}
 
     cp $out/opt/REAPER/reaper "$NIX_BUILD_TOP/reaper-pristine"
+    # REAPER's SWELL layer only works on GDK's X11 backend (Xwayland on a
+    # Wayland desktop). Wayland sessions often export GDK_BACKEND=wayland,
+    # which leaves REAPER running with no window at all.
     wrapProgram $out/opt/REAPER/reaper \
+      --set GDK_BACKEND x11 \
       --prefix PATH : "${lib.makeBinPath [ xdg-utils ]}" \
       --prefix LD_LIBRARY_PATH : "${
         lib.makeLibraryPath [
