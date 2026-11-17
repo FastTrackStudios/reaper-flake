@@ -14,6 +14,13 @@
       url = "github:FastTrackStudios/reaper-file";
       flake = false;
     };
+
+    # reaper-appmenu: exports REAPER's main menu over DBusMenu for Linux
+    # global menu bars (Loft, Plasma). Opt-in via cfg.extensions.appmenu.
+    reaper-appmenu = {
+      url = "github:Codys-Wright/reaper-appmenu";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {
@@ -32,6 +39,7 @@
       flake-utils,
       rust-overlay,
       reaper-file,
+      reaper-appmenu,
     } @ inputs:
     let
       # ── REAPER environment builder ─────────────────────────────────────────
@@ -52,6 +60,10 @@
           };
           sws = pkgs.reaper-sws-extension;
           reapack = pkgs.reaper-reapack-extension;
+          # Built with the consumer's pkgs so it links the same GLib as REAPER.
+          appmenu = (reaper-appmenu.overlays.default pkgs pkgs).reaper-appmenu;
+          appmenuEnabled = cfg.extensions.appmenu or false;
+          appmenuSo = "reaper_appmenu-${pkgs.stdenv.hostPlatform.uname.processor}.so";
 
           graphicsLibs = with pkgs; [
             libx11
@@ -164,12 +176,27 @@
                 ln -sf "${reapack}/UserPlugins/reaper_reapack-x86_64.so" "$REAPER_CONFIG/UserPlugins/"
                 echo "[reaper-flake] ReaPack extension linked"
               '';
+              # Off: drop a link we made earlier, never a user's own copy.
+              appmenuSetup =
+                if appmenuEnabled then
+                  ''
+                    ln -sf "${appmenu}/UserPlugins/${appmenuSo}" "$REAPER_CONFIG/UserPlugins/"
+                    echo "[reaper-flake] appmenu extension linked"
+                  ''
+                else
+                  ''
+                    if [ -L "$REAPER_CONFIG/UserPlugins/${appmenuSo}" ] && \
+                      readlink "$REAPER_CONFIG/UserPlugins/${appmenuSo}" | grep -q '^/nix/store/'; then
+                      rm -f "$REAPER_CONFIG/UserPlugins/${appmenuSo}"
+                    fi
+                  '';
             in
             ''
               REAPER_CONFIG="${cfg.reaper.configDir}"
               mkdir -p "$REAPER_CONFIG/UserPlugins" "$REAPER_CONFIG/Scripts"
               ${swsSetup}
               ${reapackSetup}
+              ${appmenuSetup}
             '';
 
           reaper-fhs = pkgs.buildFHSEnv {
@@ -267,6 +294,7 @@ INI
             reaper
             sws
             reapack
+            appmenu
             ;
         };
 
@@ -277,6 +305,9 @@ INI
         extensions = {
           sws = true;
           reapack = true;
+          # Global menu (DBusMenu) + hidden in-window menu bar. Off by default:
+          # only useful on a desktop with a global menu bar.
+          appmenu = false;
         };
         plugins = {
           lv2 = false;
@@ -312,6 +343,7 @@ INI
           extensions = {
             sws = false;
             reapack = false;
+            appmenu = false;
           };
           audio = {
             pipewire = true;
@@ -456,6 +488,14 @@ INI
           inherit pkgs;
           cfg = presets.dev;
         };
+        appmenuPkgs = mkReaperPackages {
+          inherit pkgs;
+          cfg = defaultConfig // {
+            extensions = defaultConfig.extensions // {
+              appmenu = true;
+            };
+          };
+        };
 
         rustToolchain = pkgs.rust-bin.stable.latest.default;
       in
@@ -465,6 +505,9 @@ INI
           reaper = defaultPkgs.reaper-wrapped;
           reaper-headless = defaultPkgs.reaper-headless-pkg;
           reaper-fhs = defaultPkgs.reaper-fhs;
+          # `nix run .#reaper-with-appmenu`: REAPER with the global-menu extension.
+          reaper-with-appmenu = appmenuPkgs.reaper-wrapped;
+          reaper-appmenu = defaultPkgs.appmenu;
         };
 
         devShells.default = pkgs.mkShell {

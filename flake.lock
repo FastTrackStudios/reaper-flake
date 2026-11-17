@@ -34,6 +34,28 @@
         "type": "github"
       }
     },
+    "reaper-appmenu": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "reaper-sdk": "reaper-sdk",
+        "wdl": "wdl"
+      },
+      "locked": {
+        "lastModified": 1794894485,
+        "narHash": "sha256-uKnYh3raHNaBAOiQJhf5diLE76Q6NqVCtRVE6LXTLX8=",
+        "owner": "Codys-Wright",
+        "repo": "reaper-appmenu",
+        "rev": "2aa102ebe1c4c83d368f14221a107665e412e115",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Codys-Wright",
+        "repo": "reaper-appmenu",
+        "type": "github"
+      }
+    },
     "reaper-file": {
       "flake": false,
       "locked": {
@@ -50,10 +72,27 @@
         "type": "github"
       }
     },
+    "reaper-sdk": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794604467,
+        "narHash": "sha256-3x3UVUJ+yTDk3ZHyvQ1ujZSTDw1XhvaURft65MreZgg=",
+        "owner": "justinfrankel",
+        "repo": "reaper-sdk",
+        "rev": "61cc0d4ada1e4d8438186ed8ba5e5f9d72b148b9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "justinfrankel",
+        "repo": "reaper-sdk",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
+        "reaper-appmenu": "reaper-appmenu",
         "reaper-file": "reaper-file",
         "rust-overlay": "rust-overlay"
       }
@@ -90,6 +129,22 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "wdl": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794604538,
+        "narHash": "sha256-MsKBbCLlkG+JI0MhTOh5lNqcXpl06WaKEkSy7M4qUCI=",
+        "owner": "justinfrankel",
+        "repo": "WDL",
+        "rev": "6a67ec5788ca6ee252b19cd8071796db49d763a7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "justinfrankel",
+        "repo": "WDL",
         "type": "github"
       }
     }
